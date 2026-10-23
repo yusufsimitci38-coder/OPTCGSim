@@ -1,6 +1,7 @@
-import type { Ability } from "../engine/types.ts";
+import type { Ability, Effect } from "../engine/types.ts";
 
 const strawHat = ["Straw Hat Crew"];
+const jetPistol: Effect = { kind: "ko", target: { owner: "opponent", zone: "character", maxPower: 6000 }, upTo: 1 };
 
 /** ST-01 Straw Hat Crew. */
 export const ST01: Record<string, Ability[]> = {
@@ -19,6 +20,8 @@ export const ST01: Record<string, Ability[]> = {
       conditions: [{ kind: "donAttached", n: 2 }],
       effects: [{ kind: "battleRestriction", blockerMaxPower: 4999 }],
     },
+    // [Trigger] Play this card.
+    { timing: "trigger", effects: [{ kind: "playSelf" }] },
   ],
   "ST01-003": [],
   // [DON!! x2] This Character gains [Rush].
@@ -81,10 +84,19 @@ export const ST01: Record<string, Ability[]> = {
         { kind: "power", target: { owner: "self", zone: "leaderOrCharacter" }, amount: 3000, duration: "battle", upTo: 1 },
       ],
     },
+    // [Trigger] Up to 1 of your Leader or Character cards gains +1000 power during this turn.
+    {
+      timing: "trigger",
+      effects: [
+        { kind: "power", target: { owner: "self", zone: "leaderOrCharacter" }, amount: 1000, duration: "turn", upTo: 1 },
+      ],
+    },
   ],
   // [Main] K.O. up to 1 of your opponent's Characters with 6000 power or less.
+  // [Trigger] Activate this card's [Main] effect.
   "ST01-015": [
-    { timing: "main", effects: [{ kind: "ko", target: { owner: "opponent", zone: "character", maxPower: 6000 }, upTo: 1 }] },
+    { timing: "main", effects: [jetPistol] },
+    { timing: "trigger", effects: [jetPistol] },
   ],
   // [Main] Select up to 1 of your {Straw Hat Crew} type Leader or Character cards. Your opponent cannot
   // activate [Blocker] if that Leader or Character attacks during this turn.
@@ -100,6 +112,11 @@ export const ST01: Record<string, Ability[]> = {
           upTo: 1,
         },
       ],
+    },
+    // [Trigger] K.O. up to 1 of your opponent's [Blocker] Characters with a cost of 3 or less.
+    {
+      timing: "trigger",
+      effects: [{ kind: "ko", target: { owner: "opponent", zone: "character", keyword: "blocker", maxCost: 3 }, upTo: 1 }],
     },
   ],
   // [Activate: Main] You may rest this Stage: Up to 1 {Straw Hat Crew} type Leader or Character card on your

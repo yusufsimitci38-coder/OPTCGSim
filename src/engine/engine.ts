@@ -412,22 +412,41 @@ function runEffect(state: GameState, task: Task & { kind: "effect" }) {
       return;
     }
     case "playSelf": {
-      const iid = ctx.source;
-      if (!me.limbo.includes(iid)) return;
-      const card = cardOf(state, iid);
-      if (card.category === "Character" && me.characters.length < MAX_CHARACTERS) {
-        me.limbo = me.limbo.filter((x) => x !== iid);
-        me.characters.push(newPermanent(state, iid));
-      } else if (card.category === "Stage") {
-        me.limbo = me.limbo.filter((x) => x !== iid);
-        if (me.stage) removeFromField(state, me.stage.iid, "trash");
-        me.stage = newPermanent(state, iid);
-      } else return;
-      log(state, `Player ${me.id + 1} plays ${src}.`);
-      pushFront(state, triggeredTasks(state, iid, "onPlay"));
+      if (me.limbo.includes(ctx.source)) playForFree(state, ctx.controller, ctx.source, "limbo");
+      return;
+    }
+    case "playFromHand": {
+      const options = me.hand.filter((iid) => {
+        const c = cardOf(state, iid);
+        if (c.category !== "Character" && c.category !== "Stage") return false;
+        if (effect.maxCost !== undefined && c.cost > effect.maxCost) return false;
+        return !effect.types || effect.types.some((t) => c.types.includes(t));
+      });
+      const picked = choose(state, task, options, 0, effect.upTo, `${src}: choose a card to play from your hand`);
+      if (!picked) return;
+      for (const iid of picked) playForFree(state, ctx.controller, iid, "hand");
       return;
     }
   }
+}
+
+/**
+ * Plays a Character or Stage without paying its cost. With 5 Characters already on the field
+ * the card stays where it is (choosing a Character to trash is not modelled yet).
+ */
+function playForFree(state: GameState, p: PlayerId, iid: string, from: "hand" | "limbo") {
+  const pl = state.players[p];
+  const card = cardOf(state, iid);
+  if (card.category === "Character") {
+    if (pl.characters.length >= MAX_CHARACTERS) return;
+    pl.characters.push(newPermanent(state, iid));
+  } else if (card.category === "Stage") {
+    if (pl.stage) removeFromField(state, pl.stage.iid, "trash");
+    pl.stage = newPermanent(state, iid);
+  } else return;
+  pl[from] = pl[from].filter((x) => x !== iid);
+  log(state, `Player ${p + 1} plays ${cardName(state, iid)}.`);
+  pushFront(state, triggeredTasks(state, iid, "onPlay"));
 }
 
 const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);

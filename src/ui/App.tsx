@@ -282,7 +282,7 @@ function CardView({ ctx, iid, perm }: { ctx: BoardCtx; iid: string; perm?: Perma
     ctx.highlighted.has(iid) ? "hl" : "",
   ];
   return (
-    <div className={classes.join(" ")} onClick={() => ctx.onSelect(iid)} title={`${card.name} (${card.id})\n${card.effect}`}>
+    <div className={classes.join(" ")} onClick={() => ctx.onSelect(iid)} title={[`${card.name} (${card.id})`, card.effect, card.trigger].filter(Boolean).join("\n")}>
       <div className="top">
         {card.category !== "Leader" && <span className="cost">{card.cost}</span>}
         {card.category === "Leader" && <span className="cost life">{card.life}</span>}
@@ -316,6 +316,7 @@ function CardDetail({ state, iid }: { state: GameState; iid: string }) {
         {c.counter ? ` · Counter +${c.counter}` : ""}
       </div>
       {c.effect && <p className="effect">{c.effect}</p>}
+      {c.trigger && <p className="effect trigger">{c.trigger}</p>}
       {!c.implemented && <p className="warn-text">⚠ This card's effect isn't implemented in the engine yet.</p>}
     </div>
   );

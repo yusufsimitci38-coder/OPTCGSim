@@ -12,7 +12,7 @@
   background: var(--bg);
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: inherit; }
 button, select { font: inherit; color: var(--text); background: #263042; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
 button:hover:not(:disabled) { border-color: var(--hl); cursor: pointer; }
 button:disabled { opacity: 0.4; }
@@ -79,6 +79,7 @@ button:disabled { opacity: 0.4; }
 .action.attachDon { border-left: 4px solid #9575cd; }
 .selected { margin-bottom: 8px; }
 .detail .effect { background: #0005; padding: 6px; border-radius: 6px; font-size: 0.9em; }
+.detail .trigger { border-left: 3px solid var(--accent); }
 .warn-text { color: var(--accent); font-size: 0.85em; }
 .log { font-size: 0.8em; max-height: 40vh; overflow-y: auto; }
 .log div { padding: 1px 0; border-bottom: 1px solid #ffffff08; }

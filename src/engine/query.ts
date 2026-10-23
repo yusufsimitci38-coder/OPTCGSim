@@ -96,6 +96,7 @@ export function matchesFilter(state: GameState, iid: string, filter: Filter, con
   if (filter.maxPower !== undefined && power(state, iid) > filter.maxPower) return false;
   if (filter.rested !== undefined && found.perm.rested !== filter.rested) return false;
   if (filter.types && !filter.types.some((t) => card.types.includes(t))) return false;
+  if (filter.keyword && !hasKeyword(state, iid, filter.keyword)) return false;
   return true;
 }
 

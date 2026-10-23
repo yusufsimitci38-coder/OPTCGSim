@@ -17,6 +17,11 @@ export interface CardData {
   types: string[];
   rarity: string;
   effect: string;
+  /** [Trigger] text, empty if none. */
+  trigger: string;
   set: string;
+  /** Official image of the base printing. */
   image: string;
+  /** All printings including alternate arts. */
+  images: string[];
 }

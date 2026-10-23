@@ -15,7 +15,7 @@ npm run build      # static build in dist/
 | --- | --- |
 | `src/engine/` | Headless rules engine. No UI code; pure `GameState` in, `GameState` out. |
 | `src/cards/` | Card behaviour, written in the effect DSL (`ST01.ts`, `ST02.ts`, ...). |
-| `src/data/cards.json` | Printed card data for 2,850 cards (stats + effect text). |
+| `src/data/cards.json` | Printed card data for every English card through OP-17 / EB-05 / ST-36 (stats, effect and [Trigger] text, image links). |
 | `src/ui/` | React UI (hot-seat or vs a bot). |
 | `scripts/import-cards.ts` | Rebuilds `cards.json` from the source card list. |
 | `tests/` | Vitest rule tests and a random-game fuzz test. |
@@ -66,14 +66,22 @@ Status:
 * **Everything else** is marked as not implemented (⚠ in the UI). The next step is a parser that turns
   standard effect wording into DSL drafts in bulk, with manual fixes for unusual cards.
 
+Not modelled yet: when a [Trigger] or effect plays a Character while you already have 5, the card
+is not played (the real rule lets you trash one to make room).
+
 Starter decks are 50-card lists built from the ST-01/ST-02 card pools; the copy counts are not the
 retail product's.
 
 ## Card data
 
-`src/data/cards.json` comes from [nemesis312/OnePieceTCGEngCardList](https://github.com/nemesis312/OnePieceTCGEngCardList)
-(MIT). Known gaps: it ends around OP09/EB01, and most cards' **[Trigger]** text is missing from it, so
-triggers will need a second source or manual entry. The card text and images are © Eiichiro Oda /
-Shueisha / Bandai; this is a non-commercial fan project.
+`src/data/cards.json` is generated from [punk-records](https://github.com/buhbbl/punk-records), which
+exports the official English card list ([onepiece-cardgame.com](https://en.onepiece-cardgame.com/cardlist/))
+to JSON and updates daily. Alternate arts are merged into their base card (`images` lists every printing).
+The card text and images are © Eiichiro Oda / Shueisha / Bandai; this is a non-commercial fan project.
 
-To refresh: `node scripts/import-cards.ts path/to/CardDb3.json`.
+To refresh:
+
+```bash
+git clone --depth 1 https://github.com/buhbbl/punk-records /tmp/punk-records
+node scripts/import-cards.ts /tmp/punk-records/english
+```

@@ -35,6 +35,8 @@ export const ST02: Record<string, Ability[]> = {
       timing: "onPlay",
       effects: [{ kind: "ko", target: { owner: "opponent", zone: "character", rested: true, maxCost: 3 }, upTo: 1 }],
     },
+    // [Trigger] Play this card.
+    { timing: "trigger", effects: [{ kind: "playSelf" }] },
   ],
   "ST02-006": [],
   // [Activate: Main] You may rest 1 of your DON!! cards and this Character: Look at 5 cards from the top of
@@ -107,6 +109,8 @@ export const ST02: Record<string, Ability[]> = {
         { kind: "setDonActive", upTo: 1 },
       ],
     },
+    // [Trigger] Set up to 2 of your DON!! cards as active.
+    { timing: "trigger", effects: [{ kind: "setDonActive", upTo: 2 }] },
   ],
   // [Counter] Up to 1 of your Leader or Character cards gains +4000 power during this battle. Then, set up to 1 of your DON!! cards as active.
   "ST02-016": [
@@ -119,5 +123,9 @@ export const ST02: Record<string, Ability[]> = {
     },
   ],
   // [Main] Rest up to 1 of your opponent's Characters.
-  "ST02-017": [{ timing: "main", effects: [{ kind: "rest", target: { owner: "opponent", zone: "character" }, upTo: 1 }] }],
+  // [Trigger] Play up to 1 {Supernovas} type card with a cost of 2 or less from your hand.
+  "ST02-017": [
+    { timing: "main", effects: [{ kind: "rest", target: { owner: "opponent", zone: "character" }, upTo: 1 }] },
+    { timing: "trigger", effects: [{ kind: "playFromHand", upTo: 1, maxCost: 2, types: supernovas }] },
+  ],
 };

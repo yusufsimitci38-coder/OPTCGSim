@@ -40,6 +40,7 @@ export interface Filter {
   types?: string[];
   /** Exclude the card that owns the ability. */
   notSelf?: boolean;
+  keyword?: Keyword;
 }
 
 export type TargetSpec = "self" | Filter;
@@ -58,7 +59,8 @@ export type Effect =
   | { kind: "searchTop"; look: number; types?: string[]; upTo: number }
   | { kind: "battleRestriction"; noBlockers?: boolean; blockerMaxPower?: number }
   | { kind: "status"; target: TargetSpec; status: Status; duration: Duration; upTo?: number }
-  | { kind: "playSelf" }; // e.g. "[Trigger] Play this card."
+  | { kind: "playSelf" } // e.g. "[Trigger] Play this card."
+  | { kind: "playFromHand"; upTo: number; maxCost?: number; types?: string[] };
 
 export type Status = "unblockable";
 

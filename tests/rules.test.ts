@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createGame, getLegalActions, power, validateDeck } from "../src/engine/index.ts";
-import { act, battleTurn, has, KID_DECK, leader, LUFFY_DECK, newGame, toField, toHand } from "./helpers.ts";
+import { act, battleTurn, has, KID_DECK, leader, LUFFY_DECK, make, newGame, toField, toHand } from "./helpers.ts";
 
 describe("setup and turn structure", () => {
   it("starter decks are legal", () => {
@@ -327,5 +327,63 @@ describe("card effects", () => {
     s = act(s, { type: "attack", attacker: zoro, target: leader(s, 1) });
     expect(s.pending).toBeNull();
     expect(s.players[1].life).toHaveLength(4);
+  });
+});
+
+describe("[Trigger]", () => {
+  /** Player 1's Leader attacks Player 2's Leader, whose top Life card is `lifeCard`. */
+  function hitLife(lifeCard: string) {
+    let s = battleTurn(newGame(), 0);
+    s.players[1].hand = [];
+    const iid = make(s, 1, lifeCard);
+    s.players[1].life.unshift(iid);
+    s = act(s, { type: "attack", attacker: leader(s, 0), target: leader(s, 1) });
+    return { s, iid };
+  }
+
+  it("the defender may add the card to hand instead", () => {
+    const { s, iid } = hitLife("ST02-005");
+    expect(s.pending).toEqual({ type: "trigger", player: 1, iid });
+    const s2 = act(s, { type: "trigger", activate: false });
+    expect(s2.players[1].hand).toEqual([iid]);
+    expect(s2.players[1].characters).toHaveLength(0);
+  });
+
+  it("Killer's [Trigger] plays it, which also fires [On Play]", () => {
+    let { s, iid } = hitLife("ST02-005");
+    const target = toField(s, 0, "ST01-006", { rested: true });
+    s = act(s, { type: "trigger", activate: true });
+    expect(s.players[1].characters.map((c) => c.iid)).toEqual([iid]);
+    expect(s.pending).toMatchObject({ type: "choose", player: 1, options: [target] });
+    s = act(s, { type: "choose", selection: [target] });
+    expect(s.players[0].trash).toContain(target);
+    expect(s.players[1].limbo).toEqual([]);
+  });
+
+  it("an Event [Trigger] resolves and the Event goes to the trash", () => {
+    let { s, iid } = hitLife("ST01-014");
+    s = act(s, { type: "trigger", activate: true });
+    s = act(s, { type: "choose", selection: [leader(s, 1)] });
+    expect(s.players[1].trash).toContain(iid);
+    expect(power(s, leader(s, 1))).toBe(6000);
+  });
+
+  it("Diable Jambe's [Trigger] can only K.O. a [Blocker] with cost 3 or less", () => {
+    let { s } = hitLife("ST01-016");
+    const chopper = toField(s, 0, "ST01-006");
+    toField(s, 0, "ST01-003");
+    s = act(s, { type: "trigger", activate: true });
+    expect(s.pending).toMatchObject({ type: "choose", options: [chopper] });
+  });
+
+  it("Straw Sword's [Trigger] plays a cost 2 or less {Supernovas} card from hand", () => {
+    let { s } = hitLife("ST02-017");
+    const bege = toHand(s, 1, "ST02-004"); // cost 1 Supernovas
+    toHand(s, 1, "ST02-011"); // Kid Pirates, not Supernovas
+    toHand(s, 1, "ST02-005"); // cost 3
+    s = act(s, { type: "trigger", activate: true });
+    expect(s.pending).toMatchObject({ type: "choose", options: [bege] });
+    s = act(s, { type: "choose", selection: [bege] });
+    expect(s.players[1].characters.map((c) => c.iid)).toEqual([bege]);
   });
 });
