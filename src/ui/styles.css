@@ -6,6 +6,7 @@
   --muted: #8a93a3;
   --accent: #f5b942;
   --hl: #4fc3f7;
+  color-scheme: dark;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   color: var(--text);
   background: var(--bg);
@@ -28,7 +29,7 @@ button:disabled { opacity: 0.4; }
 @media (max-width: 900px) {
   .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "board" "actions" "log"; grid-template-rows: auto; }
   /* Keep the decision panel on screen while scrolling the board. */
-  .actionsPanel { top: auto; bottom: 0; z-index: 5; max-height: 42vh; overflow-y: auto; box-shadow: 0 -6px 16px #0008; }
+  .actionsPanel { top: auto; bottom: 0; z-index: 5; max-height: 42vh; overflow-y: auto; box-shadow: 0 -6px 16px #0008; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
   .actions { max-height: none; }
 }
 
