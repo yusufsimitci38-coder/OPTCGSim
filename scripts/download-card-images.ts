@@ -12,7 +12,7 @@ import { join } from "node:path";
 import sharp from "sharp";
 
 const CONCURRENCY = 6;
-/** Card art is 600px wide; 400px is plenty for the board and keeps the set around 150 MB. */
+/** Card art is 600px wide; 400px is plenty for the board and keeps all ~4,900 printings around 250 MB. */
 const WIDTH = 400;
 const RETRIES = 3;
 /** Fail the run if more than this share of downloads fail (e.g. the site blocks us). */
