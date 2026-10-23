@@ -85,3 +85,14 @@ To refresh:
 git clone --depth 1 https://github.com/buhbbl/punk-records /tmp/punk-records
 node scripts/import-cards.ts /tmp/punk-records/english
 ```
+
+## Card images
+
+The **Card images** GitHub Action (`.github/workflows/card-images.yml`) downloads every English card
+image from the official site, converts it to 400px-wide WebP and publishes it on the `card-images`
+branch as `en/<card id>.webp` (alternate arts keep their suffix, e.g. `OP01-016_p3.webp`). It runs
+every Monday and can be started by hand from the Actions tab; reruns only fetch new cards.
+
+Direct link pattern:
+`https://raw.githubusercontent.com/yusufsimitci38-coder/OPTCGSim/card-images/en/ST01-001.webp`
+
