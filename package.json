@@ -1,0 +1,36 @@
+{
+  "name": "optcgsim",
+  "version": "1.0.0",
+  "description": "One Piece TCG simulator: headless rules engine + browser UI",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "typecheck": "tsc",
+    "import-cards": "node scripts/import-cards.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yusufsimitci38-coder/OPTCGSim.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yusufsimitci38-coder/OPTCGSim/issues"
+  },
+  "homepage": "https://github.com/yusufsimitci38-coder/OPTCGSim#readme",
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.5",
+    "vitest": "^3.2.7"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "private": true,
+  "type": "module"
+}
