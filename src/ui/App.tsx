@@ -12,6 +12,7 @@ import {
   STARTER_DECKS,
 } from "../engine/index.ts";
 import type { Action, GameState, Keyword, Permanent, PlayerId } from "../engine/index.ts";
+import { cardImage } from "./images.ts";
 
 type Controller = "human" | "random";
 const DECK_NAMES = Object.keys(STARTER_DECKS);
@@ -57,6 +58,7 @@ export function App() {
   const [history, setHistory] = useState<GameState[]>(() => [newGame(decks, seed)]);
   const [selected, setSelected] = useState<string | null>(null);
   const [hideHands, setHideHands] = useState(true);
+  const [showArt, setShowArt] = useState(true);
   const state = history[history.length - 1];
   const actor = actingPlayer(state);
   const actions = useMemo(() => getLegalActions(state), [state]);
@@ -93,7 +95,7 @@ export function App() {
   const humanTurn = controllers[actor] === "human" && state.phase !== "gameOver";
   const highlighted = new Set(humanTurn ? actions.flatMap(actionCards) : []);
   const shown = selected ? actions.filter((a) => actionCards(a).includes(selected)) : actions;
-  const ctx: BoardCtx = { state, selected, highlighted, onSelect: (iid) => setSelected(iid === selected ? null : iid) };
+  const ctx: BoardCtx = { state, selected, highlighted, showArt, onSelect: (iid) => setSelected(iid === selected ? null : iid) };
   const handVisible = (p: PlayerId) => !hideHands || (controllers[p] === "human" && (actor === p || controllers[actor] !== "human"));
 
   return (
@@ -124,6 +126,9 @@ export function App() {
         <label>
           <input type="checkbox" checked={hideHands} onChange={(e) => setHideHands(e.target.checked)} /> Hide hands
         </label>
+        <label>
+          <input type="checkbox" checked={showArt} onChange={(e) => setShowArt(e.target.checked)} /> Card art
+        </label>
         <span className="muted">seed {seed}</span>
       </header>
 
@@ -148,7 +153,7 @@ export function App() {
           <PendingPrompt state={state} />
           {selected && (
             <div className="selected">
-              <CardDetail state={state} iid={selected} />
+              <CardDetail state={state} iid={selected} showArt={showArt} />
               <button onClick={() => setSelected(null)}>Show all actions</button>
             </div>
           )}
@@ -200,6 +205,7 @@ interface BoardCtx {
   state: GameState;
   selected: string | null;
   highlighted: Set<string>;
+  showArt: boolean;
   onSelect: (iid: string) => void;
 }
 
@@ -268,42 +274,73 @@ function FieldCard({ ctx, perm }: { ctx: BoardCtx; perm: Permanent }) {
   return <CardView ctx={ctx} iid={perm.iid} perm={perm} />;
 }
 
+/** Card ids whose image failed to load; those fall back to the text layout. */
+const brokenArt = new Set<string>();
+
 function CardView({ ctx, iid, perm }: { ctx: BoardCtx; iid: string; perm?: Permanent }) {
   const { state } = ctx;
   const card = cardOf(state, iid);
+  const [, rerender] = useState(0);
   const onField = !!perm && card.category !== "Stage";
   const pw = onField ? power(state, iid) : card.power;
   const keywords = onField ? KEYWORD_LABELS.filter(([k]) => hasKeyword(state, iid, k)).map(([, l]) => l) : [];
+  const art = ctx.showArt && !brokenArt.has(card.id);
   const classes = [
     "card",
-    card.colors.map((c) => c.toLowerCase()).join(" "),
+    art ? "art" : card.colors.map((c) => c.toLowerCase()).join(" "),
     perm?.rested ? "rested" : "",
     ctx.selected === iid ? "selected" : "",
     ctx.highlighted.has(iid) ? "hl" : "",
   ];
-  return (
-    <div className={classes.join(" ")} onClick={() => ctx.onSelect(iid)} title={[`${card.name} (${card.id})`, card.effect, card.trigger].filter(Boolean).join("\n")}>
-      <div className="top">
-        {card.category !== "Leader" && <span className="cost">{card.cost}</span>}
-        {card.category === "Leader" && <span className="cost life">{card.life}</span>}
-        <span className="cat">{card.category}</span>
-      </div>
-      <div className="name">{card.name}</div>
-      {(card.category === "Leader" || card.category === "Character") && (
-        <div className={`power ${pw !== card.power ? "mod" : ""}`}>{pw}</div>
-      )}
-      {card.counter > 0 && <div className="counter">+{card.counter}</div>}
+  const badges = (
+    <>
       {keywords.length > 0 && <div className="kw">{keywords.join(" · ")}</div>}
       {perm && perm.attachedDon > 0 && <div className="don">DON×{perm.attachedDon}</div>}
       {!card.implemented && <div className="warn" title="Effect not implemented yet">⚠</div>}
+    </>
+  );
+  return (
+    <div className={classes.join(" ")} onClick={() => ctx.onSelect(iid)} title={[`${card.name} (${card.id})`, card.effect, card.trigger].filter(Boolean).join("\n")}>
+      {art ? (
+        <>
+          <img
+            src={cardImage(card.id)}
+            alt={card.name}
+            loading="lazy"
+            draggable={false}
+            onError={() => {
+              brokenArt.add(card.id);
+              rerender((n) => n + 1);
+            }}
+          />
+          {onField && pw !== card.power && <div className="power-badge">{pw}</div>}
+          {badges}
+        </>
+      ) : (
+        <>
+          <div className="top">
+            {card.category !== "Leader" && <span className="cost">{card.cost}</span>}
+            {card.category === "Leader" && <span className="cost life">{card.life}</span>}
+            <span className="cat">{card.category}</span>
+          </div>
+          <div className="name">{card.name}</div>
+          {(card.category === "Leader" || card.category === "Character") && (
+            <div className={`power ${pw !== card.power ? "mod" : ""}`}>{pw}</div>
+          )}
+          {card.counter > 0 && <div className="counter">+{card.counter}</div>}
+          {badges}
+        </>
+      )}
     </div>
   );
 }
 
-function CardDetail({ state, iid }: { state: GameState; iid: string }) {
+function CardDetail({ state, iid, showArt }: { state: GameState; iid: string; showArt: boolean }) {
   const c = cardOf(state, iid);
+  const [failed, setFailed] = useState<string | null>(null);
   return (
     <div className="detail">
+      {showArt && failed !== c.id && <img className="detail-art" src={cardImage(c.id)} alt={c.name} onError={() => setFailed(c.id)} />}
       <b>
         {c.name} <span className="muted">{c.id}</span>
       </b>

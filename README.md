@@ -96,3 +96,7 @@ every Monday and can be started by hand from the Actions tab; reruns only fetch 
 Direct link pattern:
 `https://raw.githubusercontent.com/yusufsimitci38-coder/OPTCGSim/card-images/en/ST01-001.webp`
 
+The UI shows this art on every card (toggle **Card art** in the toolbar); if an image can't load the
+card falls back to the text layout. `npm run build:artifact` builds a single self-contained HTML file
+with the starter decks' images embedded, for hosts that block remote images.
+

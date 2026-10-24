@@ -7,7 +7,8 @@
     "build": "tsc && vite build",
     "test": "vitest run",
     "typecheck": "tsc",
-    "import-cards": "node scripts/import-cards.ts"
+    "import-cards": "node scripts/import-cards.ts",
+    "build:artifact": "vite build && vite-node scripts/build-artifact.ts dist/optcg-sim.html"
   },
   "repository": {
     "type": "git",
