@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import {
   actingPlayer,
   applyAction,
@@ -13,6 +13,7 @@ import {
   STARTER_DECKS,
 } from "../engine/index.ts";
 import type { Action, GameState, Keyword, Permanent, PlayerId } from "../engine/index.ts";
+import { cardBack, donArt, DON_ARTS, donBack } from "./cardArt.ts";
 import { cardImage } from "./images.ts";
 import { donSource, draggableSources, edgeOf, fieldTarget, targetsFrom } from "./interaction.ts";
 
@@ -67,6 +68,7 @@ export function App() {
   const [hideHands, setHideHands] = useState(true);
   const [showArt, setShowArt] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [donArtId, setDonArtId] = useState(DON_ARTS[0].id);
   const state = history[history.length - 1];
   const actor = actingPlayer(state);
   const humanTurn = controllers[actor] === "human" && state.phase !== "gameOver";
@@ -180,7 +182,16 @@ export function App() {
   const ctx: BoardCtx = { state, showArt, selected, targets, movable, hover, press, tap };
 
   return (
-    <div className="app">
+    <div
+      className="app"
+      style={
+        {
+          "--card-back": `url(${cardBack})`,
+          "--don-back": `url(${donBack})`,
+          "--don-front": `url(${donArt(donArtId).src})`,
+        } as CSSProperties
+      }
+    >
       <header className="topbar">
         <strong>OPTCG Sim</strong>
         <span className="turninfo">
@@ -230,6 +241,18 @@ export function App() {
           <label>
             <input id="hide-hands" type="checkbox" checked={hideHands} onChange={(e) => setHideHands(e.target.checked)} /> Hide hands
           </label>
+          {DON_ARTS.length > 1 && (
+            <label>
+              DON!!{" "}
+              <select id="don-art" value={donArtId} onChange={(e) => setDonArtId(e.target.value)}>
+                {DON_ARTS.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <label>
             <input id="card-art" type="checkbox" checked={showArt} onChange={(e) => setShowArt(e.target.checked)} /> Card art
           </label>
@@ -241,7 +264,7 @@ export function App() {
         <section className="board">
           <PlayerSide ctx={ctx} p={top} flipped handVisible={handVisible(top)} />
           <div className="midline">
-            {state.battle
+            {state.battle && state.phase !== "gameOver"
               ? `${cardOf(state, state.battle.attacker).name} attacks ${cardOf(state, state.battle.target).name}`
               : state.phase === "gameOver"
                 ? "Game over"
@@ -406,7 +429,7 @@ function PlayerSide({ ctx, p, flipped, handVisible }: { ctx: BoardCtx; p: Player
   const donRow = (
     <div className="row costrow">
       <Zone label={`DON!! deck ${pl.donDeck}`} small>
-        {pl.donDeck > 0 ? <div className="don-card deck">DON!!</div> : <div className="don-slot" />}
+        {pl.donDeck > 0 ? <div className="don-card deck" /> : <div className="don-slot" />}
       </Zone>
       <Zone label={`Cost area · ${pl.donActive} active · ${pl.donRested} rested`} grow>
         <div
@@ -604,7 +627,7 @@ function Arrows({ state, drag, movable }: { state: GameState; drag: Drag | null;
   }, []);
   useLayoutEffect(() => {
     const out: Line[] = [];
-    if (state.battle) {
+    if (state.battle && state.phase !== "gameOver") {
       const a = centerOf(state.battle.attacker);
       const b = centerOf(state.battle.target);
       if (a && b) out.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, kind: "battle" });

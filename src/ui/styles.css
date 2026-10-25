@@ -13,8 +13,6 @@
   --hl: #4fc3f7;
   --ok: #66d19e;
   --attack: #ff6b5b;
-  --don: #d9a441;
-  --don-dark: #3b2a12;
   color-scheme: dark;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   color: var(--text);
@@ -89,7 +87,7 @@ button:disabled { opacity: 0.4; }
 .card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), 0 0 14px #f5b94288; }
 .card.drop-ok { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok), 0 0 12px #66d19e88; }
 .card.hovered { box-shadow: 0 0 0 3px var(--ok), 0 0 20px var(--ok); }
-.card.back { background: repeating-linear-gradient(45deg, #263247, #263247 5px, #1d2738 5px, #1d2738 10px); border-color: #ffffff22; cursor: default; }
+.card.back { background: var(--card-back) center / cover no-repeat, #1d2a55; border-color: #0000; cursor: default; }
 .zone.characters.drop-ok { background: #66d19e1a; box-shadow: 0 0 0 2px #66d19e88 inset; }
 .zone.characters.hovered { background: #66d19e33; }
 
@@ -116,10 +114,8 @@ button:disabled { opacity: 0.4; }
 
 /* --- DON!! ----------------------------------------------------------------------------- */
 .costrow { align-items: center; }
-.don-card { width: calc(var(--cw) * 0.42); height: calc(var(--ch) * 0.42); flex: none; border-radius: 4px; border: 2px solid var(--don); background: radial-gradient(circle at 50% 40%, #6a4a1c, var(--don-dark)); position: relative; transition: transform 0.18s; }
-.don-card::after { content: "DON!!"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--don); font-weight: 900; font-size: max(8px, calc(var(--cw) * 0.12)); letter-spacing: 0.02em; }
-.don-card.deck::after { content: ""; }
-.don-card.deck { display: flex; align-items: center; justify-content: center; color: var(--don); font-weight: 900; font-size: max(8px, calc(var(--cw) * 0.12)); box-shadow: 2px 2px 0 var(--don-dark), 4px 4px 0 #0006; }
+.don-card { width: calc(var(--cw) * 0.42); height: calc(var(--ch) * 0.42); flex: none; border-radius: 3px; background: var(--don-front) center / cover no-repeat, #fff; box-shadow: 0 1px 3px #0008; position: relative; transition: transform 0.18s; }
+.don-card.deck { background-image: var(--don-back); box-shadow: 1px 1px 0 #cfd8d6, 2px 2px 0 #9fb3ae, 3px 3px 4px #000a; }
 .don-card.rested { transform: rotate(90deg) scale(0.85); filter: saturate(0.4) brightness(0.75); }
 .don-slot { width: calc(var(--cw) * 0.42); height: calc(var(--ch) * 0.42); border: 1px dashed #ffffff22; border-radius: 4px; }
 .cost-area { display: flex; align-items: center; min-height: calc(var(--ch) * 0.5); padding: 0 calc(var(--cw) * 0.12); border-radius: 8px; background: var(--zone); overflow: hidden; }
@@ -131,8 +127,7 @@ button:disabled { opacity: 0.4; }
 .cost-area.selected { box-shadow: 0 0 0 2px var(--accent) inset, 0 0 12px #f5b94266; }
 /* DON!! given to a card peek out from underneath it. */
 .attached { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-.don-card.tucked { position: absolute; left: 50%; transform: translateX(-50%); width: 86%; height: 30%; border-width: 1px; }
-.don-card.tucked::after { content: ""; }
+.don-card.tucked { position: absolute; left: 50%; transform: translateX(-50%); width: 86%; height: 30%; background-position: bottom; }
 
 /* --- Hand ------------------------------------------------------------------------------ */
 .hand { display: flex; justify-content: center; padding-top: 4px; min-height: calc(var(--ch) + 4px); }

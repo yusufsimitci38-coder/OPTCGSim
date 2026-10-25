@@ -115,3 +115,9 @@ Deck, then the DON!! deck, cost area and trash, with your hand at the bottom.
 * Everything else (End turn, Activate, Block, Trigger, ...) is a button in the panel; **All moves**
   lists every legal move.
 
+The card back and DON!! art (`src/ui/assets/`) are the official images from the play guide. DON!!
+fronts are listed in `src/ui/cardArt.ts` (`DON_ARTS`); adding an entry there makes a DON!! art picker
+appear in Settings. The **Official extras** Action (`.github/workflows/official-extras.yml`, run by
+hand) crawls the official site for DON!! and card-back images and saves candidates on the
+`card-images` branch under `extras/candidates/` (alternate DON!! arts appear on event pages).
+
