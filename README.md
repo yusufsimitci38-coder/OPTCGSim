@@ -16,7 +16,7 @@ npm run build      # static build in dist/
 | `src/engine/` | Headless rules engine. No UI code; pure `GameState` in, `GameState` out. |
 | `src/cards/` | Card behaviour, written in the effect DSL (`ST01.ts`, `ST02.ts`, ...). |
 | `src/data/cards.json` | Printed card data for every English card through OP-17 / EB-05 / ST-36 (stats, effect and [Trigger] text, image links). |
-| `src/ui/` | React UI (hot-seat or vs a bot). |
+| `src/ui/` | React UI: a playmat-style board with drag-and-drop (or tap-tap) moves, hot-seat or vs a bot. |
 | `scripts/import-cards.ts` | Rebuilds `cards.json` from the source card list. |
 | `tests/` | Vitest rule tests and a random-game fuzz test. |
 
@@ -99,4 +99,19 @@ Direct link pattern:
 The UI shows this art on every card (toggle **Card art** in the toolbar); if an image can't load the
 card falls back to the text layout. `npm run build:artifact` builds a single self-contained HTML file
 with the starter decks' images embedded, for hosts that block remote images.
+
+## Playing in the browser
+
+The board follows the official playmat: Characters face the opponent, then Life / Leader / Stage /
+Deck, then the DON!! deck, cost area and trash, with your hand at the bottom.
+
+* **Play a card:** drag it from your hand onto your Character area (or onto a Character to replace it
+  when you already have 5).
+* **Give DON!!:** drag from your cost area onto your Leader or a Character. Given DON!! peek out from
+  under the card.
+* **Attack:** drag an active Leader/Character onto an opposing Leader or rested Character.
+* **Counter:** during the counter step, drag Counter cards from your hand onto the card being attacked.
+* **Phones:** tap a card (or the cost area), then tap where it goes. Valid targets light up green.
+* Everything else (End turn, Activate, Block, Trigger, ...) is a button in the panel; **All moves**
+  lists every legal move.
 
