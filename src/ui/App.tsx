@@ -95,9 +95,9 @@ export function App() {
     return () => clearTimeout(t);
   }, [state, controllers, actor]);
 
-  const movable = useMemo(() => draggableSources(actions, actor), [actions, actor]);
+  const movable = useMemo(() => draggableSources(state, actions, actor), [state, actions, actor]);
   const activeSource = drag?.moved ? drag.source : selected;
-  const targetMap = useMemo(() => targetsFrom(actions, actor, activeSource), [actions, actor, activeSource]);
+  const targetMap = useMemo(() => targetsFrom(state, actions, actor, activeSource), [state, actions, actor, activeSource]);
   const chooseTargets = new Map(
     actions.flatMap((a) => (a.type === "choose" && a.selection.length === 1 ? [[a.selection[0], a] as const] : [])),
   );
@@ -144,7 +144,7 @@ export function App() {
       setHover(null);
       if (!d.moved) return tap(d.source);
       const target = targetAt(e.clientX, e.clientY);
-      const a = target ? targetsFrom(actions, actor, d.source).get(target) : undefined;
+      const a = target ? targetsFrom(state, actions, actor, d.source).get(target) : undefined;
       if (a) play(a);
     };
     const cancel = () => {
@@ -159,7 +159,7 @@ export function App() {
       window.removeEventListener("pointerup", up);
       window.removeEventListener("pointercancel", cancel);
     };
-  }, [drag !== null, actions, actor, movable, selected]);
+  }, [drag !== null, state, actions, actor, movable, selected]);
 
   const restart = () => {
     const s = Math.floor(Math.random() * 1e9);
@@ -428,7 +428,7 @@ function PlayerSide({ ctx, p, flipped, handVisible }: { ctx: BoardCtx; p: Player
 
   const donRow = (
     <div className="row costrow">
-      <Zone label={`DON!! deck ${pl.donDeck}`} small>
+      <Zone label={`DON!! deck ${pl.donDeck}`}>
         {pl.donDeck > 0 ? <div className="don-card deck" /> : <div className="don-slot" />}
       </Zone>
       <Zone label={`Cost area · ${pl.donActive} active · ${pl.donRested} rested`} grow>
@@ -439,19 +439,23 @@ function PlayerSide({ ctx, p, flipped, handVisible }: { ctx: BoardCtx; p: Player
           style={{ touchAction: ctx.movable.has(don) ? "none" : undefined }}
         >
           {Array.from({ length: pl.donActive }, (_, i) => (
-            <div key={`a${i}`} className="don-card" />
+            <div key={`a${i}`} className="don-spot">
+              <div className="don-card" />
+            </div>
           ))}
           {Array.from({ length: pl.donRested }, (_, i) => (
-            <div key={`r${i}`} className="don-card rested" />
+            <div key={`r${i}`} className="don-spot rested">
+              <div className="don-card rested" />
+            </div>
           ))}
           {pl.donActive + pl.donRested === 0 && <span className="muted">No DON!!</span>}
         </div>
       </Zone>
-      <Zone label={`Trash ${pl.trash.length}`} small>
+      <Zone label={`Trash ${pl.trash.length}`}>
         {pl.trash.length ? (
-          <CardFace ctx={ctx} iid={pl.trash[pl.trash.length - 1]} className="trash-top" />
+          <CardFace ctx={ctx} iid={pl.trash[pl.trash.length - 1]} />
         ) : (
-          <div className="slot-empty small" />
+          <div className="slot-empty" />
         )}
       </Zone>
     </div>
@@ -459,9 +463,11 @@ function PlayerSide({ ctx, p, flipped, handVisible }: { ctx: BoardCtx; p: Player
 
   const hand = (
     <div className={`hand ${flipped ? "opponent" : ""}`}>
-      {pl.hand.map((iid) =>
-        handVisible ? <CardFace key={iid} ctx={ctx} iid={iid} /> : <div key={iid} className="card back" />,
-      )}
+      {pl.hand.map((iid) => (
+        <div key={iid} className="hand-spot">
+          {handVisible ? <CardFace ctx={ctx} iid={iid} /> : <div className="card back" />}
+        </div>
+      ))}
     </div>
   );
 
@@ -480,9 +486,9 @@ function PlayerSide({ ctx, p, flipped, handVisible }: { ctx: BoardCtx; p: Player
   );
 }
 
-function Zone({ label, children, small, grow }: { label: string; children: ReactNode; small?: boolean; grow?: boolean }) {
+function Zone({ label, children, grow }: { label: string; children: ReactNode; grow?: boolean }) {
   return (
-    <div className={`zonebox ${small ? "small" : ""} ${grow ? "grow" : ""}`}>
+    <div className={`zonebox ${grow ? "grow" : ""}`}>
       {children}
       <div className="zlabel">{label}</div>
     </div>

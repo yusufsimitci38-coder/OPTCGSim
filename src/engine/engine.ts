@@ -671,8 +671,21 @@ function actionKey(a: Action): string {
   return JSON.stringify(entries.sort(([x], [y]) => x.localeCompare(y)));
 }
 
+/**
+ * Legal actions list one copy per card name in hand (identical copies are interchangeable).
+ * Maps an action that names any other copy onto the listed one, for legality checks.
+ */
+export function canonicalAction(state: GameState, action: Action): Action {
+  if (action.type !== "playCard" && action.type !== "counterCard" && action.type !== "counterEvent") return action;
+  const hand = state.players[actingPlayer(state)].hand;
+  if (!hand.includes(action.iid)) return action;
+  const cardId = state.instances[action.iid].cardId;
+  const first = hand.find((iid) => state.instances[iid].cardId === cardId)!;
+  return { ...action, iid: first };
+}
+
 export function isLegal(state: GameState, action: Action): boolean {
-  const key = actionKey(action);
+  const key = actionKey(canonicalAction(state, action));
   return getLegalActions(state).some((a) => actionKey(a) === key);
 }
 

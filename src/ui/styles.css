@@ -31,14 +31,14 @@ button:disabled { opacity: 0.4; }
 /* Card size: limited by width (6.6 cards across a side) and by height (the table measures 6.6 card
    heights plus ~210px of labels and bars). Phones scroll a little under the pinned panel. */
 .app {
-  --cw: min(calc((100vw - 32px) / 6.6), calc((100dvh - 260px) / 6.6 * 0.716), 104px);
+  --cw: min(calc((100vw - 32px) / 6.6), calc((100dvh - 260px) / 7.6 * 0.716), 104px);
   --ch: calc(var(--cw) * 1.397);
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 @media (min-width: 900px) {
-  .app { --cw: min(calc((100vw - 420px) / 7), calc((100dvh - 225px) / 6.6 * 0.716), 112px); }
+  .app { --cw: min(calc((100vw - 420px) / 7), calc((100dvh - 225px) / 7.6 * 0.716), 112px); }
 }
 
 .topbar { display: flex; align-items: center; gap: 8px; padding: 6px max(16px, env(safe-area-inset-right, 0px)) 6px max(16px, env(safe-area-inset-left, 0px)); background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
@@ -65,12 +65,11 @@ button:disabled { opacity: 0.4; }
 
 .row { display: flex; align-items: flex-end; gap: calc(var(--cw) * 0.12); min-width: 0; }
 .zonebox { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; }
-.zonebox.grow { flex: 1 1 auto; align-items: stretch; }
+.zonebox.grow { flex: 1 1 0; align-items: stretch; min-width: 0; }
 .zlabel { font-size: max(9px, calc(var(--cw) * 0.12)); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; text-align: center; }
 
 .zone.characters { display: flex; justify-content: center; align-items: center; gap: calc(var(--cw) * 0.12); padding: 2px 4px calc(var(--ch) * 0.1); border-radius: 8px; background: var(--zone); min-height: calc(var(--ch) * 1.12); transition: background 0.15s, box-shadow 0.15s; }
 .slot-empty { width: var(--cw); height: var(--ch); border: 1px dashed #ffffff22; border-radius: 6px; flex: none; }
-.slot-empty.small { width: calc(var(--cw) * 0.5); height: calc(var(--ch) * 0.5); }
 
 /* Life: face-down cards overlapping in a column, kept within one card height. */
 .life { position: relative; width: var(--cw); height: var(--ch); }
@@ -110,18 +109,20 @@ button:disabled { opacity: 0.4; }
 .power-badge.down { color: var(--attack); }
 .card .kw { position: absolute; z-index: 3; top: 3%; left: 3%; right: 3%; text-align: center; background: #000c; color: #b9f6ca; border-radius: 3px; font-size: max(8px, calc(var(--cw) * 0.11)); }
 .card .warn { position: absolute; z-index: 3; top: 2px; right: 3px; color: var(--accent); text-shadow: 0 0 3px #000, 0 0 3px #000; }
-.trash-top { width: calc(var(--cw) * 0.5); height: calc(var(--ch) * 0.5); }
 
 /* --- DON!! ----------------------------------------------------------------------------- */
 .costrow { align-items: center; }
-.don-card { width: calc(var(--cw) * 0.42); height: calc(var(--ch) * 0.42); flex: none; border-radius: 3px; background: var(--don-front) center / cover no-repeat, #fff; box-shadow: 0 1px 3px #0008; position: relative; transition: transform 0.18s; }
+.don-card { width: var(--cw); height: var(--ch); flex: none; border-radius: calc(var(--cw) * 0.06); background: var(--don-front) center / cover no-repeat, #fff; box-shadow: 0 1px 3px #0008; position: relative; transition: transform 0.18s; }
 .don-card.deck { background-image: var(--don-back); box-shadow: 1px 1px 0 #cfd8d6, 2px 2px 0 #9fb3ae, 3px 3px 4px #000a; }
-.don-card.rested { transform: rotate(90deg) scale(0.85); filter: saturate(0.4) brightness(0.75); }
-.don-slot { width: calc(var(--cw) * 0.42); height: calc(var(--ch) * 0.42); border: 1px dashed #ffffff22; border-radius: 4px; }
-.cost-area { display: flex; align-items: center; min-height: calc(var(--ch) * 0.5); padding: 0 calc(var(--cw) * 0.12); border-radius: 8px; background: var(--zone); overflow: hidden; }
-.cost-area .don-card + .don-card { margin-left: calc(var(--cw) * -0.22); }
-.cost-area .don-card.rested + .don-card.rested { margin-left: calc(var(--cw) * -0.1); }
-.cost-area .don-card:not(.rested) + .don-card.rested { margin-left: calc(var(--cw) * 0.12); }
+.don-card.rested { transform: rotate(90deg) scale(0.8); filter: saturate(0.4) brightness(0.75); }
+.don-slot { width: var(--cw); height: var(--ch); border: 1px dashed #ffffff22; border-radius: 6px; }
+/* Full-size DON!! sit side by side when there's room and overlap when there isn't: each sits in a
+   spot that shrinks (down to 30% of a card) while the card keeps its size. Rested ones lie sideways. */
+.cost-area { display: flex; align-items: center; min-width: 0; min-height: calc(var(--ch) * 1.04); padding: 0 calc(var(--cw) * 0.2); border-radius: 8px; background: var(--zone); overflow: hidden; }
+.don-spot { flex: 0 1 calc(var(--cw) * 1.08); min-width: calc(var(--cw) * 0.3); display: flex; justify-content: flex-start; }
+.don-spot.rested { flex-basis: calc(var(--ch) * 0.9); justify-content: center; }
+.don-spot:last-child { flex: none; width: calc(var(--cw) * 1.08); }
+.don-spot.rested:last-child { width: calc(var(--ch) * 0.9); }
 .cost-area.movable { cursor: grab; box-shadow: 0 0 0 1px #d9a44166 inset; }
 .cost-area.movable .don-card:not(.rested):hover { transform: translateY(-3px); }
 .cost-area.selected { box-shadow: 0 0 0 2px var(--accent) inset, 0 0 12px #f5b94266; }
@@ -131,11 +132,15 @@ button:disabled { opacity: 0.4; }
 
 /* --- Hand ------------------------------------------------------------------------------ */
 .hand { display: flex; justify-content: center; padding-top: 4px; min-height: calc(var(--ch) + 4px); }
-.hand .card + .card { margin-left: calc(var(--cw) * -0.18); }
+/* Cards fan out with a little overlap and squeeze together as the hand grows, like the cost area. */
+.hand { min-width: 0; }
+.hand-spot { flex: 0 1 calc(var(--cw) * 0.84); min-width: calc(var(--cw) * 0.22); }
+.hand-spot:last-child { flex: none; width: var(--cw); }
 .hand .card.movable:hover, .hand .card.selected { transform: translateY(-10px); z-index: 2; }
 .hand.opponent { min-height: calc(var(--ch) * 0.36); padding-top: 0; }
 .hand.opponent .card { width: calc(var(--cw) * 0.36); height: calc(var(--ch) * 0.36); }
-.hand.opponent .card + .card { margin-left: calc(var(--cw) * -0.1); }
+.hand.opponent .hand-spot { flex-basis: calc(var(--cw) * 0.28); min-width: calc(var(--cw) * 0.08); }
+.hand.opponent .hand-spot:last-child { width: calc(var(--cw) * 0.36); }
 
 /* --- Overlays -------------------------------------------------------------------------- */
 .arrows { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 40; }

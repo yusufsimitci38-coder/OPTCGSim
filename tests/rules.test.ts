@@ -387,3 +387,18 @@ describe("[Trigger]", () => {
     expect(s.players[1].characters.map((c) => c.iid)).toEqual([bege]);
   });
 });
+
+describe("duplicate copies in hand", () => {
+  it("any copy can be played, and that exact copy leaves the hand", () => {
+    let s = battleTurn(newGame(), 0);
+    s.players[0].hand = [];
+    const first = toHand(s, 0, "ST01-008");
+    const second = toHand(s, 0, "ST01-008");
+    // Only one move is listed for the pair...
+    expect(getLegalActions(s).filter((a) => a.type === "playCard")).toHaveLength(1);
+    // ...but playing the second copy is accepted and moves that copy.
+    s = act(s, { type: "playCard", iid: second });
+    expect(s.players[0].characters.map((c) => c.iid)).toEqual([second]);
+    expect(s.players[0].hand).toEqual([first]);
+  });
+});
