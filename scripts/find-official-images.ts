@@ -15,6 +15,8 @@ const SITE = "https://en.onepiece-cardgame.com";
 const START = ["/", "/rules/", "/play-guide/", "/products/", "/howtoplay/", "/cardlist/", "/feature/"];
 /** Image URLs worth saving. */
 const INTERESTING = /don|back|ura|sleeve|reverse/i;
+/** Pages whose images are all saved (rules diagrams show card backs under arbitrary names). */
+const SAVE_ALL_FROM = /\/(play-guide|rules)\//;
 const HEADERS = { "User-Agent": "OPTCGSim image discovery", Referer: `${SITE}/` };
 
 const [outDir, maxArg] = process.argv.slice(2);
@@ -56,7 +58,7 @@ while (queue.length && seen.size < maxPages) {
   }
 }
 
-const candidates = [...images].filter(([url]) => INTERESTING.test(url.replace(SITE, "")));
+const candidates = [...images].filter(([url, page]) => INTERESTING.test(url.replace(SITE, "")) || SAVE_ALL_FROM.test(page));
 console.log(`crawled ${seen.size} pages, found ${images.size} images, ${candidates.length} candidates:`);
 mkdirSync(outDir, { recursive: true });
 const index: { file: string; url: string; page: string }[] = [];
