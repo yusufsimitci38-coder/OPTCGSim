@@ -1,0 +1,48 @@
+# Looks through the official site for images that aren't in the card list (DON!! cards, card backs)
+# and saves candidates on the card-images branch under extras/candidates/ for review.
+name: Official extras
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/find-official-images.ts
+      - .github/workflows/official-extras.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: card-images
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Get the card-images branch
+        env:
+          REMOTE: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
+        run: git clone --depth 1 --branch card-images --single-branch "$REMOTE" "$RUNNER_TEMP/images"
+
+      - name: Find candidate images
+        run: |
+          rm -rf "$RUNNER_TEMP/images/extras/candidates"
+          node scripts/find-official-images.ts "$RUNNER_TEMP/images/extras/candidates" 150
+
+      - name: Save to the card-images branch
+        working-directory: ${{ runner.temp }}/images
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "Nothing new."; exit 0; fi
+          git commit -q --amend --no-edit
+          git push --force origin card-images
