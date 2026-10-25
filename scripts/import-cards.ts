@@ -32,7 +32,13 @@ interface SourcePack {
 }
 
 const CATEGORIES = new Set<Category>(["Leader", "Character", "Event", "Stage"]);
-const clean = (s: string | null | undefined) => (!s || s.trim() === "-" ? "" : s.replace(/\s+/g, " ").trim());
+/** The source keeps some HTML entities from the official site (e.g. "Kid &amp; Killer"). */
+const ENTITIES: Record<string, string> = { amp: "&", quot: '"', apos: "'", lt: "<", gt: ">", nbsp: " " };
+const decode = (s: string) =>
+  s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) =>
+    e[0] === "#" ? String.fromCodePoint(e[1] === "x" ? parseInt(e.slice(2), 16) : Number(e.slice(1))) : (ENTITIES[e.toLowerCase()] ?? m),
+  );
+const clean = (s: string | null | undefined) => (!s || s.trim() === "-" ? "" : decode(s).replace(/\s+/g, " ").trim());
 
 const dir = process.argv[2];
 if (!dir) throw new Error("usage: node scripts/import-cards.ts <punk-records/english>");
@@ -59,7 +65,7 @@ for (const c of [...source].sort((a, b) => Number(isBase(b)) - Number(isBase(a))
   const pack = packs[c.pack_id];
   out[id] = {
     id,
-    name: c.name.trim(),
+    name: decode(c.name).trim(),
     category: c.category as Category,
     colors: c.colors,
     cost: isLeader ? 0 : (c.cost ?? 0),
@@ -67,7 +73,7 @@ for (const c of [...source].sort((a, b) => Number(isBase(b)) - Number(isBase(a))
     power: c.power ?? 0,
     counter: c.counter ?? 0,
     attributes: c.attributes,
-    types: c.types,
+    types: c.types.map(decode),
     rarity: c.rarity,
     effect: clean(c.effect),
     trigger: clean(c.trigger),

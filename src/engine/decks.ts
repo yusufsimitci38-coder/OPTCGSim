@@ -32,6 +32,7 @@ export const MAX_COPIES = 4;
 /** Deck construction rules. Returns a list of problems (empty if legal). */
 export function validateDeck(deck: DeckList): string[] {
   const errors: string[] = [];
+  if (!deck.leader) return ["Pick a Leader", ...(deck.cards.length !== DECK_SIZE ? [`Deck has ${deck.cards.length} cards, needs ${DECK_SIZE}`] : [])];
   if (!hasCard(deck.leader)) return [`Unknown leader ${deck.leader}`];
   const leader = getCard(deck.leader);
   if (leader.category !== "Leader") errors.push(`${deck.leader} is not a Leader`);

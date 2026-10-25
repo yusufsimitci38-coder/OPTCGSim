@@ -16,7 +16,7 @@ npm run build      # static build in dist/
 | `src/engine/` | Headless rules engine. No UI code; pure `GameState` in, `GameState` out. |
 | `src/cards/` | Card behaviour, written in the effect DSL (`ST01.ts`, `ST02.ts`, ...). |
 | `src/data/cards.json` | Printed card data for every English card through OP-17 / EB-05 / ST-36 (stats, effect and [Trigger] text, image links). |
-| `src/ui/` | React UI: a playmat-style board with drag-and-drop (or tap-tap) moves, hot-seat or vs a bot. |
+| `src/ui/` | React UI: main menu, Play setup, Deck Builder, Settings, and the playmat-style game board. |
 | `scripts/import-cards.ts` | Rebuilds `cards.json` from the source card list. |
 | `tests/` | Vitest rule tests and a random-game fuzz test. |
 
@@ -99,6 +99,27 @@ Direct link pattern:
 The UI shows this art on every card (toggle **Card art** in the toolbar); if an image can't load the
 card falls back to the text layout. `npm run build:artifact` builds a single self-contained HTML file
 with the starter decks' images embedded, for hosts that block remote images.
+
+## The app
+
+* **Main menu:** Play, Deck Builder, Settings.
+* **Play:** pick your deck and the opponent's (starter decks or your saved decks that pass the deck
+  rules), and a bot or a second human on the same device.
+* **Deck Builder:** every card, searchable by name, type, effect or [Trigger] text and filterable by
+  color, card type, cost and set (Leader's colors only by default). Tap a card to add it (or set it as
+  Leader), tap **i** for details. The deck panel shows the deck rules live (50 cards, max 4 copies,
+  Leader colors), a cost curve and Counter count. Decks can be saved, copied, deleted, and exported or
+  imported as text (`4xOP01-016` per line, the format other simulators use). Starter decks are
+  read-only; copy one to edit it.
+* **Settings:** card art, hiding the other player's hand, bot speed, DON!! art.
+
+Decks and settings are saved in the browser's local storage; export a deck as text to keep a copy.
+
+### Hosted version
+
+`.github/workflows/pages.yml` builds the app and publishes it on GitHub Pages on every push, where all
+card images load. One-time setup in the repository: **Settings → Pages → Build and deployment →
+Source: GitHub Actions**. The site is then at `https://yusufsimitci38-coder.github.io/OPTCGSim/`.
 
 ## Playing in the browser
 
